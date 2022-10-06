@@ -1,0 +1,1 @@
+Erlang program to try out convergence of Gossip algorithm and push-sum algorithm.
