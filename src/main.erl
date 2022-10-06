@@ -28,7 +28,7 @@ start(NumNodes, Topology, Algorithm)->
             register(getNeighbours, spawn(main, getConnectedActors,[NeighbourMap])),
             Pid1 ! "Awesome";
         
-        pushSumActor ->
+        push_sum ->
             Pid1 = spawn(pushSumActor, start),
             Pid2 = spawn(pushSumActor, start),
             Pid3 = spawn(pushSumActor, start),
