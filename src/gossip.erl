@@ -5,9 +5,7 @@
     
 spreadRumor(ConnectedNodes, Rumor) ->
     Len = length(ConnectedNodes),
-    % io:fwrite("~nLen = ~w",[Len]),
     Nth = rand:uniform(Len),
-    % io:fwrite("~nNTH = ~w",[Nth]),
     ChosenNeighbour = lists:nth(Nth, ConnectedNodes),
     io:fwrite("~nTime to spread the Rumor to ~w!!!", [ChosenNeighbour]),
     ChosenNeighbour ! Rumor.
@@ -28,7 +26,6 @@ listenToRumor(Master, RumourCount) when RumourCount < 10->
 
             receive
                 ConnectedNodes -> 
-                    % io:fwrite("~nFound neighbour"),
                     spreadRumor(ConnectedNodes, Rumor)
             end,
 
