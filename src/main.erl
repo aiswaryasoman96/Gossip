@@ -15,18 +15,10 @@ getConnectedActors(NeighbourMap) ->
             
 
 start(NumNodes, Topology, Algorithm)->
-    io:fwrite("Starting ~n"),
-    % Fill this part up based on the topology
-
     case Algorithm of 
-        gossip ->
-            % temporary testing
-            Pid1 = spawn(gossip, listenToRumor,[self(),0]),
-            Pid2 = spawn(gossip, listenToRumor,[self(),0]),
-            Pid3 = spawn(gossip, listenToRumor,[self(),0]),
-            NeighbourMap = maps:from_list([{Pid1, [Pid2, Pid3]},{Pid2, [Pid1, Pid3]},{Pid3, [Pid1, Pid2]}]),
-            register(getNeighbours, spawn(main, getConnectedActors,[NeighbourMap])),
-            Pid1 ! "Awesome";
+        gossip -> 
+            io:fwrite("Starting the Gossip...."),
+            topology:line(NumNodes);
         
         push_sum ->
             Pid1 = spawn(pushSumActor, start),
