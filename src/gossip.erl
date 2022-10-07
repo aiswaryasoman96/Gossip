@@ -1,6 +1,5 @@
 -module(gossip).
 -export([listenToRumor/2]).
--import_module(server).
 
     
 spreadRumor(ConnectedNodes, Rumor) ->

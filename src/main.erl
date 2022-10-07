@@ -18,8 +18,13 @@ start(NumNodes, Topology, Algorithm)->
     case Algorithm of 
         gossip -> 
             io:fwrite("Starting the Gossip...."),
-            topology:line(NumNodes);
-        
+            case Topology of 
+                line ->
+                    line:build(NumNodes);
+                full ->
+                    full:build(NumNodes)
+            end;        
+
         push_sum ->
             Pid1 = spawn(pushSumActor, start),
             Pid2 = spawn(pushSumActor, start),
