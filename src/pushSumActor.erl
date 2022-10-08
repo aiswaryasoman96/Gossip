@@ -1,27 +1,35 @@
 -module(pushSumActor).
--export([start/3]).
+-export([start/1]).
 -import_module(server).
 
-startPush(Master,MySum,MyWeight,ConnectedNodes,Round) when Round == 10->
-    Ratio = MySum/MyWeight,
-    {Master}!Ratio;
+startPush(_,_,_,PrevRatio,ConvergedRounds) when ConvergedRounds == 3->
 
-startPush(Master,MySum,MyWeight,ConnectedNodes,Round) when Round < 10->
+    io:fwrite("~n Converged at ~w in ~w Actor", [PrevRatio,self()]);
+
+startPush(MySum,MyWeight,ConnectedNodes, PrevRatio,ConvergedRounds) when ConvergedRounds < 3 ->
     NumOfNodes = length(ConnectedNodes),
     receive
         {Sum,Weight} ->
-                MySum = Sum/2 + MySum,
-                MyWeight = MyWeight + Weight/2 
-    end,
-        RandomNumber = rand:uniform(NumOfNodes),
-        PingPid = lists:nth(RandomNumber, ConnectedNodes),
-        {PingPid} ! {MySum/2,MyWeight/2},
-        MySum= MySum/2,
-        MyWeight = MyWeight/2,
-    startPush(Master,MySum,MyWeight,ConnectedNodes,Round +1).
-
-start(Master,MySum,MyWeight)->
-    receive
-        ConnectedNodes ->
-            startPush(Master,MySum,MyWeight,ConnectedNodes,0)
+                NewSum = Sum/2 + MySum,
+                NewWeight = MyWeight + Weight/2,
+                RandomNumber = rand:uniform(NumOfNodes),
+                PingPid = lists:nth(RandomNumber, ConnectedNodes),
+                {PingPid} ! {MySum/2,MyWeight/2},
+                CurrentRatio = NewSum/NewWeight,
+                Diff = math:pow(10, -10),
+                if (PrevRatio - CurrentRatio) < Diff ->
+                    NewConvergedRounds = ConvergedRounds+1
+                ;true ->
+                    NewConvergedRounds = 0
+                end,
+                startPush(NewSum,NewWeight,ConnectedNodes,CurrentRatio,NewConvergedRounds)
     end.
+    
+
+start(MySum) -> 
+    getNeighbours ! self(),
+    receive
+        ConnectedNodes -> 
+            startPush(MySum,1,ConnectedNodes,MySum/1,0)
+    end.
+    
