@@ -1,5 +1,5 @@
 -module(line).
--export([build/1]).
+-export([build/2]).
 
 lineBuild(NumNodes, CurrentList, Previous, Current) when NumNodes == 0 ->
     NeighbourList = CurrentList ++ [{Current, [Previous]}],
@@ -20,8 +20,14 @@ lineBuild(NumNodes, NeighbourList, Previous, Current) when NumNodes > 0 ->
     end.
 
 
-build(NumNodes) ->
-    io:fwrite("~nSpawning in Line topology"),
-    Current = spawn(gossip, listenToRumor,[self(),0]),
-    lineBuild(NumNodes -1,[], "", Current),
-    Current ! "Awesome".
+build(NumNodes,Algorithm) ->
+    io:fwrite("~nBuilding topology"),
+    if Algorithm == "gossip"->
+        Current = spawn(gossip, listenToRumor,[self(),0]),
+        lineBuild(NumNodes -1,[], "", Current),
+        Current ! "Awesome"
+    ;true ->
+        Current = spawn(pushSumActor, start,[1]),
+        lineBuild(NumNodes -1,[], "", Current),
+        Current ! {1,1}
+    end.
