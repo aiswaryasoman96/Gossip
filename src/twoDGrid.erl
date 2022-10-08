@@ -6,12 +6,12 @@ build(NumNodes,Algorithm) ->
     buildNodeList(1,1,Dimension,[],Algorithm,Dimension*Dimension).
 
 
-buildNodeList(CurrentI, CurrentJ, Dimension, NodeList,_,_) when ((CurrentI > Dimension) or (CurrentJ > Dimension)) ->
+buildNodeList(CurrentI, CurrentJ, Dimension, NodeList,Algorithm,_) when ((CurrentI > Dimension) or (CurrentJ > Dimension)) ->
 
     io:fwrite("Printing List ~w~n",[NodeList]),
     NodeMap = maps:from_list(NodeList),
     io:fwrite("Printing Map ~w~n",[NodeMap]),
-    buildNeighbourMap(1,1,Dimension,NodeMap,[]);
+    buildNeighbourMap(1,1,Dimension,NodeMap,[],Algorithm);
 
 
 
@@ -19,7 +19,7 @@ buildNodeList(CurrentI, CurrentJ, Dimension, NodeList,Algorithm,Count) when ((Cu
     if Algorithm == "gossip" ->
         Pid = spawn(gossip, listenToRumor,[self(),0])
     ;(Algorithm == "push-Sum") ->
-        Pid = spawn(pushSum, startActor,[self(),0],Count)
+        Pid = spawn(pushSumActor, start,[Count])
     end,
     NewNodeList = NodeList ++ [{[CurrentI,CurrentJ],Pid}],
     if CurrentI == Dimension ->
@@ -40,16 +40,22 @@ isValid(T, Dimension) ->
     ICondition and JCondition.
     
 
-buildNeighbourMap(CurrentI,CurrentJ,Dimension,NodeMap,NeighbourList) when ((CurrentI > Dimension) or (CurrentJ > Dimension)) ->
+buildNeighbourMap(CurrentI,CurrentJ,Dimension,NodeMap,NeighbourList,Algorithm) when ((CurrentI > Dimension) or (CurrentJ > Dimension)) ->
     NeighbourMap = maps:from_list(NeighbourList),
     io:fwrite("Printing Indices ~w~n",[NeighbourMap]),
     register(getNeighbours, spawn(main, getConnectedActors,[NeighbourMap])),
-    io:fwrite("~nLine Topology structuring complete"),
-    StartPid = maps:get([ceil(Dimension/2),ceil(Dimension/2)],NodeMap),
-    StartPid ! "Awesome";
+    io:fwrite(" Topology structuring complete"),
+    
+    if Algorithm == "gossip"->
+        StartPid = maps:get([ceil(Dimension/2),ceil(Dimension/2)],NodeMap),
+        StartPid ! "Awesome"
+    ;true ->
+        StartPid = maps:get([1,1],NodeMap),
+        StartPid ! {1,1}
+    end;
 
     
-buildNeighbourMap(CurrentI,CurrentJ,Dimension,NodeMap,NeighbourList) when ((CurrentI =< Dimension) and (CurrentJ =< Dimension)) -> 
+buildNeighbourMap(CurrentI,CurrentJ,Dimension,NodeMap,NeighbourList,Algorithm) when ((CurrentI =< Dimension) and (CurrentJ =< Dimension)) -> 
 
     CurrentNeighbours = [[CurrentI-1,CurrentJ-1],[CurrentI-1,CurrentJ],[CurrentI-1,CurrentJ+1],
                         [CurrentI,CurrentJ-1],[CurrentI,CurrentJ+1],
@@ -60,11 +66,11 @@ buildNeighbourMap(CurrentI,CurrentJ,Dimension,NodeMap,NeighbourList) when ((Curr
         if CurrentI == Dimension ->
             NewCurrentI = 1,
             NewCurrentJ = CurrentJ+1 ,
-            buildNeighbourMap(NewCurrentI,NewCurrentJ,Dimension,NodeMap,NewNeighbourList)
+            buildNeighbourMap(NewCurrentI,NewCurrentJ,Dimension,NodeMap,NewNeighbourList,Algorithm)
     ;(CurrentI < Dimension) ->
             NewCurrentI = CurrentI+1,
             NewCurrentJ = CurrentJ,
-            buildNeighbourMap(NewCurrentI,NewCurrentJ,Dimension,NodeMap,NewNeighbourList)
+            buildNeighbourMap(NewCurrentI,NewCurrentJ,Dimension,NodeMap,NewNeighbourList,Algorithm)
     end.
 
 

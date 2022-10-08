@@ -20,11 +20,11 @@ start(NumNodes, Topology, Algorithm)->
             io:fwrite("Starting the Gossip...."),
             case Topology of 
                 line ->
-                    line:build(NumNodes);
+                    line:build(NumNodes,"gossip");
                 full ->
-                    full:build(NumNodes);
+                    full:build(NumNodes,"gossip");
                 '2D' ->
-                    twoDGrid:build(NumNodes)
+                    twoDGrid:build(NumNodes,"gossip")
             end;        
 
         push_sum ->
@@ -32,7 +32,7 @@ start(NumNodes, Topology, Algorithm)->
                 line ->
                     line:build(NumNodes,"push-Sum");
                 full ->
-                    full:build(NumNodes);
+                    full:build(NumNodes,"push-Sum");
                 '2D' ->
                     twoDGrid:build(NumNodes,"push-Sum")
             end
