@@ -22,15 +22,19 @@ start(NumNodes, Topology, Algorithm)->
                 line ->
                     line:build(NumNodes);
                 full ->
-                    full:build(NumNodes)
+                    full:build(NumNodes);
+                '2D' ->
+                    twoDGrid:build(NumNodes)
             end;        
 
         push_sum ->
-            Pid1 = spawn(pushSumActor, start),
-            Pid2 = spawn(pushSumActor, start),
-            Pid3 = spawn(pushSumActor, start),
-            {Pid1} ! [Pid2,Pid3],
-            {Pid2} ! [Pid1,Pid3],
-            {Pid3} ! [Pid1,Pid2]
+            case Topology of 
+                line ->
+                    line:build(NumNodes,"push-Sum");
+                full ->
+                    full:build(NumNodes);
+                '2D' ->
+                    twoDGrid:build(NumNodes,"push-Sum")
+            end
     end.
     
