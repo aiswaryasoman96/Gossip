@@ -1,41 +1,31 @@
 -module(line).
 -export([build/2]).
 
-lineBuild(NumNodes, CurrentList, Previous, Current,_) when NumNodes == 0 ->
+lineBuild(_, NumNodes, CurrentList, Previous, Current) when NumNodes == 0 ->
     NeighbourList = CurrentList ++ [{Current, [Previous]}],
     NeighbourMap = maps:from_list(NeighbourList),
     io:fwrite("~n Node map : ~w", [NeighbourList]),
     register(getNeighbours, spawn(main, getConnectedActors,[NeighbourMap])),
     io:fwrite("~nLine Topology structuring complete");
 
-lineBuild(NumNodes, NeighbourList, Previous, Current,Algorithm) when NumNodes > 0 ->
+lineBuild(Algorithm, NumNodes, NeighbourList, Previous, Current) when NumNodes > 0 ->
     if Previous =/= "" ->
-        if Algorithm == "gossip"->
-            Next = spawn(gossip, listenToRumor,[self(),0])
-        ;true ->
-            Next = spawn(pushSumActor, start,[NumNodes])
-        end,
+        Next = spawn(Algorithm, start,[NumNodes]),
         NewList = NeighbourList ++ [{Current, [Previous, Next]}],
-        lineBuild(NumNodes - 1, NewList, Current, Next,Algorithm);
+        lineBuild(Algorithm, NumNodes - 1, NewList, Current, Next);
     true->
-        if Algorithm == "gossip"->
-            Next = spawn(gossip, listenToRumor,[self(),0])
-        ;true ->
-            Next = spawn(pushSumActor, start,[NumNodes])
-        end,
+        Next = spawn(Algorithm, start,[NumNodes]),
         NewList = NeighbourList ++ [{Current, [Next]}],
-        lineBuild(NumNodes - 1, NewList, Current, Next,Algorithm)
+        lineBuild(Algorithm, NumNodes - 1, NewList, Current, Next)
     end.
 
 
-build(NumNodes,Algorithm) ->
-    io:fwrite("~nBuilding topology"),
-    if Algorithm == "gossip"->
-        Current = spawn(gossip, listenToRumor,[self(),0]),
-        lineBuild(NumNodes -1,[], "", Current,Algorithm),
+build(Algorithm, NumNodes) ->
+    io:fwrite("~nBuilding in Line topology"),
+    Current = spawn(Algorithm, start,[NumNodes]),
+    lineBuild(Algorithm, NumNodes -1,[], "", Current),
+    if (Algorithm == 'gossip') -> 
         Current ! "Awesome"
     ;true ->
-        Current = spawn(pushSumActor, start,[NumNodes]),
-        lineBuild(NumNodes -1,[], "", Current,Algorithm),
-        Current ! {1,1}
+        Current ! {1, 1}
     end.
