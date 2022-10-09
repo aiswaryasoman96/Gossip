@@ -2,7 +2,12 @@
 -export([build/2]).
 
 build(Algorithm, NumNodes) ->
-    Dimension = floor(math:sqrt(NumNodes)) + 1,
+    Dim = floor(math:sqrt(NumNodes)),
+    if Dim*Dim == NumNodes ->
+        Dimension = Dim
+    ;true ->
+        Dimension = Dim + 1
+    end,
     buildNodeList(1,1,Dimension,[],Algorithm,Dimension*Dimension).
 
 
@@ -67,3 +72,5 @@ buildNeighbourMap(CurrentI,CurrentJ,Dimension,NodeMap,NeighbourList,Algorithm) w
             NewCurrentJ = CurrentJ,
             buildNeighbourMap(NewCurrentI,NewCurrentJ,Dimension,NodeMap,NewNeighbourList,Algorithm)
     end.
+
+
