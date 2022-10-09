@@ -9,24 +9,27 @@ spreadRumor(ConnectedNodes, Rumor) ->
     io:fwrite("~nTime to spread the Rumor to ~w!!!", [ChosenNeighbour]),
     ChosenNeighbour ! Rumor.
 
-start(RumourCount) when RumourCount == 20->
+listenToRumor(_, _, RumorCount) when RumorCount == 20->
     % Stop listening and spreading!!!
     io:fwrite("~nHad enough of the Rumors!!! Quitting ~w", [self()]),
-    timer:sleep(500000),
-    % Trying a infinite loop of doing nothing!!
-    start(RumourCount);
+    exit(self(), kill);
 
-% Master required?
-start(RumourCount) when RumourCount < 20->
+
+listenToRumor(Rumor, ConnectedNodes, RumorCount) when RumorCount < 20->
+    spreadRumor(ConnectedNodes, Rumor),
     receive
         Rumor ->
-            io:fwrite("~nRumor ~w received by ~w!!!",[RumourCount,self()]),
-            getNeighbours ! self(),
+            io:fwrite("~nRumor ~w received by ~w!!!",[RumorCount, self()]),
+            listenToRumor(Rumor, ConnectedNodes, RumorCount + 1)
+    end.
 
+start(_) ->
+    receive
+        Rumor ->
+            io:fwrite("~nRumor ~w received by ~w!!!",[0, self()]),
+            getNeighbours ! self(),
             receive
                 ConnectedNodes -> 
-                    spreadRumor(ConnectedNodes, Rumor)
-            end,
-
-        start(RumourCount + 1)
+                    listenToRumor(Rumor, ConnectedNodes, 0)
+            end
     end.

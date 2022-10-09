@@ -15,7 +15,6 @@ makeNodes(_, NumNodes, NodeList) when NumNodes == 0 ->
 
 makeNodes(Algorithm, NumNodes, NodeList) when NumNodes > 0 ->
     NewList = NodeList ++ [spawn(Algorithm, start,[NumNodes])],
-    io:fwrite("~nCreate new node ~w",[(NewList)]),
     makeNodes(Algorithm, NumNodes -1, NewList).
 
 build(Algorithm, NumNodes) -> 

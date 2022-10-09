@@ -4,7 +4,6 @@
 lineBuild(_, NumNodes, CurrentList, Previous, Current) when NumNodes == 0 ->
     NeighbourList = CurrentList ++ [{Current, [Previous]}],
     NeighbourMap = maps:from_list(NeighbourList),
-    io:fwrite("~n Node map : ~w", [NeighbourList]),
     register(getNeighbours, spawn(main, getConnectedActors,[NeighbourMap])),
     io:fwrite("~nLine Topology structuring complete");
 
