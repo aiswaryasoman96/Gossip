@@ -1,13 +1,12 @@
 -module(twoDGrid).
 -export([build/2]).
 
-build(NumNodes,Algorithm) ->
+build(Algorithm, NumNodes) ->
     Dimension = floor(math:sqrt(NumNodes)) + 1,
     buildNodeList(1,1,Dimension,[],Algorithm,Dimension*Dimension).
 
 
 buildNodeList(CurrentI, CurrentJ, Dimension, NodeList,Algorithm,_) when ((CurrentI > Dimension) or (CurrentJ > Dimension)) ->
-
     io:fwrite("Printing List ~w~n",[NodeList]),
     NodeMap = maps:from_list(NodeList),
     io:fwrite("Printing Map ~w~n",[NodeMap]),
@@ -16,11 +15,7 @@ buildNodeList(CurrentI, CurrentJ, Dimension, NodeList,Algorithm,_) when ((Curren
 
 
 buildNodeList(CurrentI, CurrentJ, Dimension, NodeList,Algorithm,Count) when ((CurrentI =< Dimension) and (CurrentJ =< Dimension)) ->
-    if Algorithm == "gossip" ->
-        Pid = spawn(gossip, listenToRumor,[self(),0])
-    ;(Algorithm == "push-Sum") ->
-        Pid = spawn(pushSumActor, start,[Count])
-    end,
+    Pid = spawn(Algorithm, start,[Count]),
     NewNodeList = NodeList ++ [{[CurrentI,CurrentJ],Pid}],
     if CurrentI == Dimension ->
             NewCurrentI = 1,
@@ -72,8 +67,3 @@ buildNeighbourMap(CurrentI,CurrentJ,Dimension,NodeMap,NeighbourList,Algorithm) w
             NewCurrentJ = CurrentJ,
             buildNeighbourMap(NewCurrentI,NewCurrentJ,Dimension,NodeMap,NewNeighbourList,Algorithm)
     end.
-
-
-
-
-
