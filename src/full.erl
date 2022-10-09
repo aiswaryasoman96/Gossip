@@ -1,39 +1,28 @@
 -module(full).
--export([build/2, getNeighbourList/1]).
+-export([build/2]).
 
-getNeighbourList(NodeList) ->
-    receive
-        MyPID ->
-            Nth = rand:uniform(length(NodeList)),
-            ChosenNeighbour = lists:nth(Nth, NodeList),
-            if ChosenNeighbour =/= MyPID ->
-                MyPID ! [ChosenNeighbour]
-            ; true ->
-                getNeighbours ! MyPID
-            end
-    end,
-    getNeighbourList(NodeList).
+makeMap(NodeList, NeighbourMapList, Index) when Index > length(NodeList) ->
+    register(getNeighbours, spawn(main, getConnectedActors,[maps:from_list(NeighbourMapList)]));
 
+makeMap(NodeList, NeighbourMapList, Index) when Index =< length(NodeList) ->
+    CurrNode = lists:nth(Index, NodeList),
+    NeighbourList = [T || T <- NodeList , T =/= CurrNode],
+    NewNeighbourMapList = NeighbourMapList ++ [{CurrNode, NeighbourList}],
+    makeMap(NodeList, NewNeighbourMapList, Index + 1).
 
-makeNodes(NumNodes, NodeList,_) when NumNodes ==0 ->
-    register(getNeighbours, spawn(full, getNeighbourList,[NodeList]));
+makeNodes(_, NumNodes, NodeList) when NumNodes == 0 ->
+    makeMap(NodeList, [], 1);
 
-makeNodes(NumNodes, NodeList,Algorithm) when NumNodes > 0 ->
-    if Algorithm == "gossip" ->
-        NewList = NodeList ++ [spawn(gossip, listenToRumor,[self(),0])]
-    ;true->
-        NewList = NodeList ++ [spawn(pushSumActor, start,[NumNodes])]
-    end,
-    makeNodes(NumNodes -1, NewList,Algorithm).
+makeNodes(Algorithm, NumNodes, NodeList) when NumNodes > 0 ->
+    NewList = NodeList ++ [spawn(Algorithm, start,[NumNodes])],
+    io:fwrite("~nCreate new node ~w",[(NewList)]),
+    makeNodes(Algorithm, NumNodes -1, NewList).
 
-build(NumNodes,Algorithm) -> 
-    if Algorithm == "gossip" ->
-        FirstNode = spawn(gossip, listenToRumor,[self(),0]),
-        makeNodes(NumNodes -1, [FirstNode],Algorithm),
+build(Algorithm, NumNodes) -> 
+    FirstNode = spawn(Algorithm, start,[NumNodes]),
+    makeNodes(Algorithm, NumNodes -1, [FirstNode]),
+    if (Algorithm == 'gossip') -> 
         FirstNode ! "Awesome"
-        % make the call
     ;true ->
-        FirstNode = spawn(pushSumActor, start,[NumNodes]),
-        makeNodes(NumNodes -1, [FirstNode],Algorithm),
         FirstNode ! {0,0}
     end.
