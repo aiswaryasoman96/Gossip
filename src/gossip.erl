@@ -1,5 +1,5 @@
 -module(gossip).
--export([listenToRumor/2]).
+-export([start/1]).
 
     
 spreadRumor(ConnectedNodes, Rumor) ->
@@ -9,15 +9,15 @@ spreadRumor(ConnectedNodes, Rumor) ->
     io:fwrite("~nTime to spread the Rumor to ~w!!!", [ChosenNeighbour]),
     ChosenNeighbour ! Rumor.
 
-listenToRumor(Master, RumourCount) when RumourCount == 20->
+start(RumourCount) when RumourCount == 20->
     % Stop listening and spreading!!!
     io:fwrite("~nHad enough of the Rumors!!! Quitting ~w", [self()]),
     timer:sleep(500000),
     % Trying a infinite loop of doing nothing!!
-    listenToRumor(Master, RumourCount);
+    start(RumourCount);
 
 % Master required?
-listenToRumor(Master, RumourCount) when RumourCount < 20->
+start(RumourCount) when RumourCount < 20->
     receive
         Rumor ->
             io:fwrite("~nRumor ~w received by ~w!!!",[RumourCount,self()]),
@@ -28,5 +28,5 @@ listenToRumor(Master, RumourCount) when RumourCount < 20->
                     spreadRumor(ConnectedNodes, Rumor)
             end,
 
-        listenToRumor(Master, RumourCount + 1)
+        start(RumourCount + 1)
     end.
