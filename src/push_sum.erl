@@ -1,4 +1,4 @@
--module(pushSumActor).
+-module(push_sum).
 -export([start/1]).
 -import_module(server).
 
