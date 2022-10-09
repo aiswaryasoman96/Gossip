@@ -26,5 +26,5 @@ build(Algorithm, NumNodes) ->
     if (Algorithm == 'gossip') -> 
         Current ! "Awesome"
     ;true ->
-        Current ! {1, 1}
+        Current ! {0, 0}
     end.

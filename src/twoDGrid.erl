@@ -46,7 +46,7 @@ buildNeighbourMap(CurrentI,CurrentJ,Dimension,NodeMap,NeighbourList,Algorithm) w
         StartPid ! "Awesome"
     ;true ->
         StartPid = maps:get([1,1],NodeMap),
-        StartPid ! {1,1}
+        StartPid ! {0,0}
     end;
 
     
