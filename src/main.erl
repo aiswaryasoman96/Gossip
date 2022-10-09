@@ -18,6 +18,8 @@ start(NumNodes, Topology, Algorithm)->
         full ->
             full:build(Algorithm, NumNodes);
         '2D' ->
-            twoDGrid:build(Algorithm, NumNodes)
+            twoDGrid:build(Algorithm, NumNodes);
+        imp3D ->
+            imp3D:build(Algorithm, NumNodes)
     end.       
 

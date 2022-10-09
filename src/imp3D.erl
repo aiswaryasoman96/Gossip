@@ -22,9 +22,9 @@ buildNodeList(CurrentI, CurrentJ,CurrentK, Dimension, NodeList,Algorithm,Count,V
     NewNodeList = NodeList ++ [{[CurrentI,CurrentJ,CurrentK],Pid}],
     NewCoords = getNextCoordinate(CurrentI, CurrentJ,CurrentK, Dimension),
     NewCurrentI = lists:nth(1, NewCoords),NewCurrentJ= lists:nth(2, NewCoords),NewCurrentK=lists:nth(3, NewCoords),
-    Validity = ((NewCurrentI =< Dimension) and (NewCurrentJ =< Dimension)and (NewCurrentK =< Dimension)),
+    NewValidity = ((NewCurrentI =< Dimension) and (NewCurrentJ =< Dimension)and (NewCurrentK =< Dimension)),
     io:fwrite("Node List ~w~n",[NewNodeList]),
-    buildNodeList(NewCurrentI,NewCurrentJ,NewCurrentK,Dimension,NewNodeList,Algorithm,Count-1,Validity).
+    buildNodeList(NewCurrentI,NewCurrentJ,NewCurrentK,Dimension,NewNodeList,Algorithm,Count-1,NewValidity).
     
 
 getNextCoordinate(CurrentI, CurrentJ,CurrentK, Dimension) ->
@@ -84,20 +84,20 @@ buildNeighbourMap(CurrentI,CurrentJ,CurrentK,Dimension,NodeMap,NeighbourList,Alg
     CurrentNeighbours = [[CurrentI-1,CurrentJ-1,CurrentK],[CurrentI-1,CurrentJ,CurrentK],[CurrentI-1,CurrentJ+1,CurrentK],
                         [CurrentI,CurrentJ-1,CurrentK],[CurrentI,CurrentJ+1,CurrentK],
                         [CurrentI+1,CurrentJ-1,CurrentK],[CurrentI+1,CurrentJ,CurrentK],[CurrentI+1,CurrentJ+1,CurrentK]],
-    NextPlaneNeighbours = lists:append([[lists:nth(1, T),lists:nth(2, T),CurrentK-1] || T <- CurrentNeighbours,isValid([lists:nth(1, T),lists:nth(2, T),CurrentK-1],Dimension)],
-                                 [[lists:nth(1, T),lists:nth(2, T),CurrentK+1] || T <- CurrentNeighbours,isValid([lists:nth(1, T),lists:nth(2, T),CurrentK+1],Dimension)]),
+    NextPlaneNeighbours = [[lists:nth(1, T),lists:nth(2, T),CurrentK-1] || T <- CurrentNeighbours,isValid([lists:nth(1, T),lists:nth(2, T),CurrentK-1],Dimension)]
+                        ++ [[lists:nth(1, T),lists:nth(2, T),CurrentK+1] || T <- CurrentNeighbours,isValid([lists:nth(1, T),lists:nth(2, T),CurrentK+1],Dimension)],
     Len = length(NextPlaneNeighbours),
     Nth = rand:uniform(Len),
     RandomNextPlaneNeighbourIndex = lists:nth(Nth, NextPlaneNeighbours),
     RandomNextPlaneNeighbour = maps:get(RandomNextPlaneNeighbourIndex,NodeMap),
     CleanNeighboursIndices = [T|| T <- CurrentNeighbours, isValid(T,Dimension) ],
     CleanNeighbourList = [maps:get(E,NodeMap)||E <- CleanNeighboursIndices,true],
-    TotalNeighbours = lists:append(CleanNeighbourList,RandomNextPlaneNeighbour),
+    TotalNeighbours = CleanNeighbourList ++ [RandomNextPlaneNeighbour],
     NewNeighbourList = NeighbourList ++ [{maps:get([CurrentI,CurrentJ,CurrentK],NodeMap), TotalNeighbours}],
     NewCoords = getNextCoordinate(CurrentI, CurrentJ,CurrentK, Dimension),
     NewCurrentI = lists:nth(1, NewCoords),NewCurrentJ= lists:nth(2, NewCoords),NewCurrentK=lists:nth(3, NewCoords),
-    Validity = ((NewCurrentI =< Dimension) and (NewCurrentJ =< Dimension)and (NewCurrentK =< Dimension)),
+    NewValidity = ((NewCurrentI =< Dimension) and (NewCurrentJ =< Dimension)and (NewCurrentK =< Dimension)),
     io:fwrite("NeighbourMap List ~w~n",[NewNeighbourList]),
-    buildNeighbourMap(NewCurrentI,NewCurrentJ,NewCurrentK,Dimension,NodeMap,NewNeighbourList,Algorithm,Validity).
+    buildNeighbourMap(NewCurrentI,NewCurrentJ,NewCurrentK,Dimension,NodeMap,NewNeighbourList,Algorithm,NewValidity).
 
 
