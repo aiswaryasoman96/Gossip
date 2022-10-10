@@ -71,10 +71,8 @@ buildNeighbourMap(_,_,_,Dimension,NodeMap,NeighbourList,Algorithm,Validity) when
     StartPid = maps:get(Indices,NodeMap),   
     io:fwrite("Final NeighbourMap List ~w~n",[NeighbourMap]),
     if Algorithm == "gossip"->
-        % StartPid = maps:get([ceil(Dimension/2),ceil(Dimension/2)],NodeMap),
         StartPid ! "Awesome"
     ;true ->
-        % StartPid = maps:get([1,1,1],NodeMap),
         StartPid ! {0,0}
     end;
 

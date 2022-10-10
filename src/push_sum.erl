@@ -6,7 +6,7 @@ startPush(_,_,_,PrevRatio,ConvergedRounds) when ConvergedRounds == 3->
 
     io:fwrite("~n Converged at ~w in ~w Actor", [PrevRatio,self()]);
 
-startPush(MySum,MyWeight,ConnectedNodes, PrevRatio,ConvergedRounds) when ConvergedRounds < 3 ->
+startPush(MySum,MyWeight,ConnectedNodes, PrevRatio,ConvergedRounds) when ConvergedRounds =/= 3 ->
     NumOfNodes = length(ConnectedNodes),
     receive
         {Sum,Weight} ->
@@ -44,12 +44,6 @@ start(MySum) ->
                 PingPid ! {NewSum/2,NewWeight/2},
                 io:fwrite("~n~w Sent values : ~w and ~w to ~w", [self(),NewSum/2,NewWeight/2,PingPid]),
                 CurrentRatio = NewSum/NewWeight,
-                % Diff = math:pow(10, -10),
-                % if (PrevRatio - CurrentRatio) < Diff ->
-                %     NewConvergedRounds = ConvergedRounds+1
-                % ;true ->
-                %     NewConvergedRounds = 0
-                % end,
                 startPush(NewSum/2,NewWeight/2,ConnectedNodes,CurrentRatio,0)
             end
     end.
