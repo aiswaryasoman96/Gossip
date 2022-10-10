@@ -4,8 +4,7 @@
 lineBuild(_, NumNodes, CurrentList, Previous, Current) when NumNodes == 0 ->
     NeighbourList = CurrentList ++ [{Current, [Previous]}],
     NeighbourMap = maps:from_list(NeighbourList),
-    register(getNeighbours, spawn(main, getConnectedActors,[NeighbourMap])),
-    io:fwrite("~nLine Topology structuring complete");
+    register(getNeighbours, spawn(main, getConnectedActors,[NeighbourMap]));
 
 lineBuild(Algorithm, NumNodes, NeighbourList, Previous, Current) when NumNodes > 0 ->
     if Previous =/= "" ->
@@ -20,7 +19,6 @@ lineBuild(Algorithm, NumNodes, NeighbourList, Previous, Current) when NumNodes >
 
 
 build(Algorithm, NumNodes) ->
-    io:fwrite("~nBuilding in Line topology"),
     Current = spawn(Algorithm, start,[NumNodes]),
     lineBuild(Algorithm, NumNodes -1,[], "", Current),
     if (Algorithm == 'gossip') -> 
