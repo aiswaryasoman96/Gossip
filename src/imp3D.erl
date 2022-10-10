@@ -11,9 +11,7 @@ build(Algorithm, NumNodes) ->
     buildNodeList(1,1,1,Dimension,[],Algorithm,Dimension*Dimension*Dimension,true).
 
 buildNodeList(_, _, _,Dimension, NodeList,Algorithm,_,Validity) when Validity == false ->
-    io:fwrite("Printing Final Node List ~w~n",[NodeList]),
     NodeMap = maps:from_list(NodeList),
-    io:fwrite("Printing Node Map ~w~n",[NodeMap]),
     buildNeighbourMap(1,1,1,Dimension,NodeMap,[],Algorithm,true);
 
 
@@ -23,7 +21,6 @@ buildNodeList(CurrentI, CurrentJ,CurrentK, Dimension, NodeList,Algorithm,Count,V
     NewCoords = getNextCoordinate(CurrentI, CurrentJ,CurrentK, Dimension),
     NewCurrentI = lists:nth(1, NewCoords),NewCurrentJ= lists:nth(2, NewCoords),NewCurrentK=lists:nth(3, NewCoords),
     NewValidity = ((NewCurrentI =< Dimension) and (NewCurrentJ =< Dimension)and (NewCurrentK =< Dimension)),
-    io:fwrite("Node List ~w~n",[NewNodeList]),
     buildNodeList(NewCurrentI,NewCurrentJ,NewCurrentK,Dimension,NewNodeList,Algorithm,Count-1,NewValidity).
     
 
@@ -64,12 +61,11 @@ isValid(T, Dimension) ->
 
 buildNeighbourMap(_,_,_,Dimension,NodeMap,NeighbourList,Algorithm,Validity) when Validity == false ->
     NeighbourMap = maps:from_list(NeighbourList),
-    io:fwrite("Printing Indices ~w~n",[NeighbourMap]),
     register(getNeighbours, spawn(main, getConnectedActors,[NeighbourMap])),
     io:fwrite(" Topology structuring complete"),
     Indices = [rand:uniform(Dimension),rand:uniform(Dimension),rand:uniform(Dimension)],
     StartPid = maps:get(Indices,NodeMap),   
-    io:fwrite("Final NeighbourMap List ~w~n",[NeighbourMap]),
+    io:fwrite("NeighbourMap List ~w~n",[NeighbourMap]),
     if Algorithm == "gossip"->
         StartPid ! "Awesome"
     ;true ->
@@ -95,7 +91,6 @@ buildNeighbourMap(CurrentI,CurrentJ,CurrentK,Dimension,NodeMap,NeighbourList,Alg
     NewCoords = getNextCoordinate(CurrentI, CurrentJ,CurrentK, Dimension),
     NewCurrentI = lists:nth(1, NewCoords),NewCurrentJ= lists:nth(2, NewCoords),NewCurrentK=lists:nth(3, NewCoords),
     NewValidity = ((NewCurrentI =< Dimension) and (NewCurrentJ =< Dimension)and (NewCurrentK =< Dimension)),
-    io:fwrite("NeighbourMap List ~w~n",[NewNeighbourList]),
     buildNeighbourMap(NewCurrentI,NewCurrentJ,NewCurrentK,Dimension,NodeMap,NewNeighbourList,Algorithm,NewValidity).
 
 
