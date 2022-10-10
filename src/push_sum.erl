@@ -32,7 +32,7 @@ start(MySum) ->
     MyWeight = 1,
     receive
         {Sum,Weight} ->
-            getNeighbours ! self(),
+            getNeighbours ! {self(), self()},
             receive
                 ConnectedNodes -> 
                 io:fwrite("~n~w got values : ~w and ~w ", [self(),Sum,Weight]),

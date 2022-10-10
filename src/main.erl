@@ -5,8 +5,8 @@
 % Generic method to keep the track of neighbours of any node. Idea is to store the info in a map(PID, Neighbourlist) format
 getConnectedActors(NeighbourMap) ->
     receive
-        MyPID ->
-            MyPID ! maps:get(MyPID, NeighbourMap)
+        {Caller ,PID }->
+            Caller ! maps:get(PID, NeighbourMap)
     end,
     getConnectedActors(NeighbourMap).
             

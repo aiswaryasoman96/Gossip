@@ -1,50 +1,48 @@
 -module(gossip).
--export([start/1, spreadRumor/2, listenToRumor/4]).
+-export([start/1, spreadRumor/2, getConnectedActors/1]).
 
 
 spreadRumor(ConnectedNodes, Rumor) ->
-    receive
-        {PID, true} -> 
-            Len = length(ConnectedNodes),
-            Nth = rand:uniform(Len),
-            ChosenNeighbour = lists:nth(Nth, ConnectedNodes),
-            IsProcessAlive = is_process_alive(ChosenNeighbour),
+    Len = length(ConnectedNodes),
+    Nth = rand:uniform(Len),
+    ChosenNeighbour = lists:nth(Nth, ConnectedNodes),
+    IsProcessAlive = is_process_alive(ChosenNeighbour),
+    
+    if IsProcessAlive == true ->
+        ChosenNeighbour ! Rumor
+    ;true ->
+        true
+    end,
 
-            if IsProcessAlive == true ->
-                ChosenNeighbour ! Rumor
-            ;true ->
-                self() ! {PID, true},
-                spreadRumor(ConnectedNodes, Rumor)
-            end,
+    spreadRumor(ConnectedNodes, Rumor).
 
-            spreadRumor(ConnectedNodes, Rumor);
-        {PID, false} -> 
-            io:fwrite("~n~w stopped spreading", [PID])
-    end.
-
-listenToRumor(_, _, SpreadPID, RumorCount) when RumorCount > 10->
+listenToRumor(_, RumorCount) when RumorCount > 10->
     % Stop listening and spreading!!!
-    SpreadPID ! {self(), false},
     io:fwrite("~n~w got 10 Rumors!!!", [self()]);
 
 
-listenToRumor(Rumor, ConnectedNodes, SpreadPID,RumorCount) when RumorCount =< 10->
+listenToRumor(Rumor,  RumorCount) when RumorCount =< 10->
     receive
         Rumor ->
-            io:fwrite("~n~w Got ~w Rumor", [self(), RumorCount]),
-            SpreadPID ! {self(), true},
-            listenToRumor(Rumor, ConnectedNodes, SpreadPID, RumorCount + 1)
+            io:fwrite("~n~w Got ~w Rumor", [self(), RumorCount]),        
+            listenToRumor(Rumor, RumorCount + 1)
+    end.
+
+getConnectedActors(Rumor) ->
+    receive
+        CallerPID ->
+            getNeighbours ! {self(), CallerPID},
+        receive
+            ConnectedNodes -> 
+                spawn(gossip, spreadRumor, [ConnectedNodes, Rumor])
+        end
     end.
 
 start(_) ->
     receive
         Rumor ->
             io:fwrite("~n~w Got First Rumor", [self()]),
-            getNeighbours ! self(),
-            receive
-                ConnectedNodes -> 
-                    SpreadPID = spawn(gossip, spreadRumor, [ConnectedNodes, Rumor]),
-                    SpreadPID ! {self(), true},
-                    listenToRumor(Rumor, ConnectedNodes, SpreadPID,  2)
-            end
+            GetNeighborPID= spawn(gossip, getConnectedActors, [Rumor]),
+            GetNeighborPID ! self(),
+            listenToRumor(Rumor, 2)
     end.
