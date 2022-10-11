@@ -44,7 +44,8 @@ buildNeighbourMap(CurrentI,CurrentJ,Dimension,NodeMap,NeighbourList,Algorithm) w
     io:fwrite(" Topology structuring complete"),
     % io:fwrite("~n~w",[NeighbourMap]),
     {WallClock1,WallClock2} = statistics(wall_clock),
-    io:fwrite("~n Start time ~w and ~w", [WallClock1,WallClock2]),
+    io:fwrite("~n Start time ~w and ~w", [WallClock1,WallClock2]), 
+timer:sleep(3000),
     if Algorithm == "gossip"->
         StartPid = maps:get([ceil(Dimension/2),ceil(Dimension/2)],NodeMap),
         StartPid ! "Awesome"

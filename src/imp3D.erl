@@ -67,7 +67,8 @@ buildNeighbourMap(_,_,_,Dimension,NodeMap,NeighbourList,Algorithm,Validity) when
     StartPid = maps:get(Indices,NodeMap),   
     % io:fwrite("NeighbourMap List ~w~n",[NeighbourMap]),
     {WallClock1,WallClock2} = statistics(wall_clock),
-    io:fwrite("~n Start time ~w and ~w", [WallClock1,WallClock2]),
+    io:fwrite("~n Start time ~w and ~w", [WallClock1,WallClock2]), 
+timer:sleep(3000),
     if Algorithm == "gossip"->
         StartPid ! "Awesome"
     ;true ->
