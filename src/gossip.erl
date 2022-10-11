@@ -1,5 +1,5 @@
 -module(gossip).
--export([start/1, spreadRumor/2, getConnectedActors/1]).
+-export([start/1, spreadRumor/2, getConnectedActors/1, listenToRumor/3]).
 
 
 spreadRumor(ConnectedNodes, Rumor) ->
@@ -16,17 +16,18 @@ spreadRumor(ConnectedNodes, Rumor) ->
 
     spreadRumor(ConnectedNodes, Rumor).
 
-listenToRumor(_, RumorCount) when RumorCount > 10->
+listenToRumor(_, SpreadPID, RumorCount) when RumorCount > 10->
     % Stop listening and spreading!!!
     {WallClock1,WallClock2} = statistics(wall_clock),
+    exit(SpreadPID, normal),
     io:fwrite("~n~w got 10 Rumors!!!Time Converged ~w and ~w", [self(),WallClock1,WallClock2]);
-    
 
-listenToRumor(Rumor,  RumorCount) when RumorCount =< 10->
+
+listenToRumor(Rumor, SpreadPID, RumorCount) when RumorCount =< 10->
     receive
         Rumor ->
-            io:fwrite("~n~w Got ~w Rumor", [self(), RumorCount]),        
-            listenToRumor(Rumor, RumorCount + 1)
+            % io:fwrite("~n~w Got ~w Rumor", [self(), RumorCount]),        
+            listenToRumor(Rumor, SpreadPID, RumorCount + 1)
     end.
 
 getConnectedActors(Rumor) ->
@@ -35,15 +36,19 @@ getConnectedActors(Rumor) ->
             getNeighbours ! {self(), CallerPID},
         receive
             ConnectedNodes -> 
-                spawn(gossip, spreadRumor, [ConnectedNodes, Rumor])
+                SpreadPID = spawn(gossip, spreadRumor, [ConnectedNodes, Rumor]),
+                CallerPID ! {SpreadPID, CallerPID}
         end
     end.
 
 start(_) ->
     receive
         Rumor ->
-            io:fwrite("~n~w Got First Rumor", [self()]),
+            % io:fwrite("~n~w Got First Rumor", [self()]),
             GetNeighborPID= spawn(gossip, getConnectedActors, [Rumor]),
             GetNeighborPID ! self(),
-            listenToRumor(Rumor, 2)
+            receive
+                {SpreadPID, _} ->
+                    listenToRumor(Rumor, SpreadPID, 2)
+            end
     end.
