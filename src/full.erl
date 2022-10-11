@@ -20,6 +20,8 @@ makeNodes(Algorithm, NumNodes, NodeList) when NumNodes > 0 ->
 build(Algorithm, NumNodes) -> 
     FirstNode = spawn(Algorithm, start,[NumNodes]),
     makeNodes(Algorithm, NumNodes -1, [FirstNode]),
+    {WallClock1,WallClock2} = statistics(wall_clock),
+    io:fwrite("~n Start time ~w and ~w", [WallClock1,WallClock2]),
     if (Algorithm == 'gossip') -> 
         FirstNode ! "Awesome"
     ;true ->

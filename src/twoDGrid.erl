@@ -12,9 +12,7 @@ build(Algorithm, NumNodes) ->
 
 
 buildNodeList(CurrentI, CurrentJ, Dimension, NodeList,Algorithm,_) when ((CurrentI > Dimension) or (CurrentJ > Dimension)) ->
-    io:fwrite("Printing List ~w~n",[NodeList]),
     NodeMap = maps:from_list(NodeList),
-    io:fwrite("Printing Map ~w~n",[NodeMap]),
     buildNeighbourMap(1,1,Dimension,NodeMap,[],Algorithm);
 
 
@@ -42,10 +40,11 @@ isValid(T, Dimension) ->
 
 buildNeighbourMap(CurrentI,CurrentJ,Dimension,NodeMap,NeighbourList,Algorithm) when ((CurrentI > Dimension) or (CurrentJ > Dimension)) ->
     NeighbourMap = maps:from_list(NeighbourList),
-    io:fwrite("Printing Indices ~w~n",[NeighbourMap]),
     register(getNeighbours, spawn(main, getConnectedActors,[NeighbourMap])),
     io:fwrite(" Topology structuring complete"),
-    
+    % io:fwrite("~n~w",[NeighbourMap]),
+    {WallClock1,WallClock2} = statistics(wall_clock),
+    io:fwrite("~n Start time ~w and ~w", [WallClock1,WallClock2]),
     if Algorithm == "gossip"->
         StartPid = maps:get([ceil(Dimension/2),ceil(Dimension/2)],NodeMap),
         StartPid ! "Awesome"

@@ -4,13 +4,15 @@
 
 startPush(_,_,_,PrevRatio,ConvergedRounds) when ConvergedRounds == 3->
 
-    io:fwrite("~n Converged at ~w in ~w Actor", [PrevRatio,self()]);
+    io:fwrite("~n Converged at ~w in ~w Actor", [PrevRatio,self()]),
+    {WallClock1,WallClock2} = statistics(wall_clock),
+    io:fwrite("~n Time Converged ~w and ~w~n", [WallClock1,WallClock2]);
 
 startPush(MySum,MyWeight,ConnectedNodes, PrevRatio,ConvergedRounds) when ConvergedRounds =/= 3 ->
     NumOfNodes = length(ConnectedNodes),
     receive
         {Sum,Weight} ->
-                io:fwrite("~n~w got values : ~w and ~w ", [self(),Sum,Weight]),
+                % io:fwrite("~n~w got values : ~w and ~w ", [self(),Sum,Weight]),
                 NewSum = Sum + MySum,
                 NewWeight = MyWeight + Weight,
                 RandomNumber = rand:uniform(NumOfNodes),
@@ -23,7 +25,7 @@ startPush(MySum,MyWeight,ConnectedNodes, PrevRatio,ConvergedRounds) when Converg
                 ;true ->
                     NewConvergedRounds = 0
                 end,
-                io:fwrite("~n~w Sent values : ~w and ~w to ~w and now Ratio is ~w and Round is ~w", [self(),NewSum/2,NewWeight/2,PingPid,CurrentRatio,NewConvergedRounds]),
+                % io:fwrite("~n~w Sent values : ~w and ~w to ~w and now Ratio is ~w and Round is ~w", [self(),NewSum/2,NewWeight/2,PingPid,CurrentRatio,NewConvergedRounds]),
                 startPush(NewSum/2,NewWeight/2,ConnectedNodes,CurrentRatio,NewConvergedRounds)
     end.
     
@@ -35,14 +37,14 @@ start(MySum) ->
             getNeighbours ! {self(), self()},
             receive
                 ConnectedNodes -> 
-                io:fwrite("~n~w got values : ~w and ~w ", [self(),Sum,Weight]),
+                % io:fwrite("~n~w got values : ~w and ~w ", [self(),Sum,Weight]),
                 NewSum = Sum + MySum,
                 NewWeight = MyWeight + Weight,
                 NumOfNodes = length(ConnectedNodes),
                 RandomNumber = rand:uniform(NumOfNodes),
                 PingPid = lists:nth(RandomNumber, ConnectedNodes),
                 PingPid ! {NewSum/2,NewWeight/2},
-                io:fwrite("~n~w Sent values : ~w and ~w to ~w", [self(),NewSum/2,NewWeight/2,PingPid]),
+                % io:fwrite("~n~w Sent values : ~w and ~w to ~w", [self(),NewSum/2,NewWeight/2,PingPid]),
                 CurrentRatio = NewSum/NewWeight,
                 startPush(NewSum/2,NewWeight/2,ConnectedNodes,CurrentRatio,0)
             end

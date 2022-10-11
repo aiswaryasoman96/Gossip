@@ -21,6 +21,8 @@ lineBuild(Algorithm, NumNodes, NeighbourList, Previous, Current) when NumNodes >
 build(Algorithm, NumNodes) ->
     Current = spawn(Algorithm, start,[NumNodes]),
     lineBuild(Algorithm, NumNodes -1,[], "", Current),
+    {WallClock1,WallClock2} = statistics(wall_clock),
+    io:fwrite("~n Start time ~w and ~w", [WallClock1,WallClock2]),
     if (Algorithm == 'gossip') -> 
         Current ! "Awesome"
     ;true ->

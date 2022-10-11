@@ -18,8 +18,9 @@ spreadRumor(ConnectedNodes, Rumor) ->
 
 listenToRumor(_, RumorCount) when RumorCount > 10->
     % Stop listening and spreading!!!
-    io:fwrite("~n~w got 10 Rumors!!!", [self()]);
-
+    {WallClock1,WallClock2} = statistics(wall_clock),
+    io:fwrite("~n~w got 10 Rumors!!!Time Converged ~w and ~w", [self(),WallClock1,WallClock2]);
+    
 
 listenToRumor(Rumor,  RumorCount) when RumorCount =< 10->
     receive
